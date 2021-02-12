@@ -1,5 +1,6 @@
 module.exports = {
     Gun: require('./Gun'),
     Category: require('./Category'),
-    RootDocumentForGuns: require('./RootDocumentForGuns')
+    RootDocumentForGuns: require('./RootDocumentForGuns'),
+    User: require('./User')
 }
