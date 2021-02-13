@@ -1,13 +1,21 @@
 const { validationResult } = require('express-validator'); 
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 
 const { User } = require('../models');
+const {transporter, registration} = require('../emails')
 
 class AuthController {
     async checkAuth(req, res) {
+        if(req.session.user) {
+            return res.status(200).json({
+                succes: true,
+                data: req.session.user
+            })
+        }
         res.status(200).json({
-            succes: Boolean(req.session.isAuth)
+            succes: false,
         })
     }
 
@@ -24,11 +32,20 @@ class AuthController {
             }
 
             const passwordHash = await bcrypt.hash(password, 10);
-            bcrypt.compare
+            const emailConfirmationToken = await new Promise ((resolve, reject) => {
+                crypto.randomBytes(32, (err, buffer) => {
+                    if(err) {
+                        reject(err);
+                    }
+                    resolve(buffer.toString('hex'));
+                })
+            })
+
             const user = new User({
                 name,
                 surname,
                 email,
+                emailConfirmationToken,
                 password: passwordHash,
                 cart: { items: [] },
                 favorites: [],
@@ -39,6 +56,8 @@ class AuthController {
             res.status(201).json({
                 succes: true,
             })
+
+            transporter.sendMail(registration(email, emailConfirmationToken));
 
         } catch (e) {
             console.log(e);
@@ -65,7 +84,6 @@ class AuthController {
                 const areSame = await bcrypt.compare(password, candidate.password);
                 if ( areSame ) {
                     req.session.user = candidate; 
-                    req.session.isAuth = true;
                     return req.session.save(err => {
                         if (err) {
                             throw err;
@@ -107,6 +125,32 @@ class AuthController {
                 succes: true, 
             })
         });
+    }
+
+    async confirmEmail(req, res) {
+        try {
+            const candidate = await User.findOne({emailConfirmationToken: req.params.token});
+            if (!candidate) {
+                return res.status(404).json({
+                    succes: false,
+                    message: 'TOKEN NOT FOUND'
+                });
+            }
+
+            candidate.emailConfirmationToken = null;
+            candidate.isEmailConfirmed = true;
+            await candidate.save();
+
+            res.status(200).json({
+                succes: true
+            });
+
+        } catch (e) {
+            res.status(500).json({
+                succes: false,
+                message: e.message,
+            });
+        }
     }
 }
 

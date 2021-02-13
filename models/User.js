@@ -13,6 +13,13 @@ const userSchema = new Schema({
         type: String,
         required: true,
     },
+    isEmailConfirmed: {
+        type: Boolean,
+        default: false,
+    },
+    emailConfirmationToken: {
+        type: String,
+    },
     password: {
         type: String,
         required: true, 

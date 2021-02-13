@@ -17,9 +17,11 @@
     "cloudinary": "^1.23.0",
     "connect-mongodb-session": "^2.4.1",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "express-validator": "^6.9.2",
-    "mongoose": "^5.11.13"
+    "mongoose": "^5.11.13",
+    "nodemailer": "^6.4.18"
   }
 }

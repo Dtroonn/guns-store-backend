@@ -37,7 +37,7 @@ app.use('/api/auth', require('./routes/auth'));
 
 async function start() {
     try {
-       await mongoose.connect(MONGODB_URI, {
+       const db = await mongoose.connect(MONGODB_URI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         })
