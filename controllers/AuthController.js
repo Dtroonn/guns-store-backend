@@ -127,6 +127,53 @@ class AuthController {
         });
     }
 
+    async sendConfirmationEmail(req, res) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(422).json({
+                    succes: false,
+                    message: errors.array()[0].msg
+                })
+            }
+
+            const candidate = await User.findOne({email: req.body.email});
+            if (!candidate) {
+                return res.status(404).json({
+                    succes: false,
+                    message: 'Пользователь с такой почтой не найден'
+                })
+            }
+            if (candidate.isEmailConfirmed) {
+                return res.status(200).json({
+                    succes: false,
+                    message: 'Почта уже подтверждена'
+                })
+            }
+            const emailConfirmationToken = await new Promise ((resolve, reject) => {
+                crypto.randomBytes(32, (err, buffer) => {
+                    if(err) {
+                        reject(err);
+                    }
+                    resolve(buffer.toString('hex'));
+                })
+            })
+            candidate.emailConfirmationToken = emailConfirmationToken;
+            await candidate.save();
+            res.status(200).json({
+                succes: true,
+            })
+
+            transporter.sendMail(registration(candidate.email, emailConfirmationToken));
+        }
+         catch (e) {
+            res.status(500).json({
+                succes: false,
+                message: e.message,
+            })
+        }
+    }
+
     async confirmEmail(req, res) {
         try {
             const candidate = await User.findOne({emailConfirmationToken: req.params.token});
@@ -157,7 +204,7 @@ class AuthController {
         try {
             const errors = validationResult(req);
             if(!errors.isEmpty()) {
-               return res.status(404).json({
+               return res.status(422).json({
                     succes: false,
                     message: errors.array()[0].msg,
                 })
@@ -235,7 +282,7 @@ class AuthController {
         try {
             const errors = validationResult(req);
             if(!errors.isEmpty()) {
-                return res.status(404).json({
+                return res.status(422).json({
                     succes: false,
                     message: errors.array()[0].msg 
                 })

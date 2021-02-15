@@ -41,3 +41,7 @@ exports.setPasswordValidator = [
         }
     })
 ]
+
+exports.sendConfirmationEmailValidator = [
+    body('email').isEmail().withMessage('Некорректный email').normalizeEmail(),
+]
