@@ -17,12 +17,14 @@ const userSchema = new Schema({
         type: Boolean,
         default: false,
     },
-    emailConfirmationToken: {
-        type: String,
-    },
+    emailConfirmationToken: String,
     password: {
         type: String,
         required: true, 
+    },
+    passwordResetToken: {
+        body: String,
+        expireAt: Date
     },
     favorites: [{type: Schema.Types.ObjectId, ref: 'Gun'}],
     cart: {
@@ -41,6 +43,6 @@ const userSchema = new Schema({
         ]
     },
 
-});
+}, { versionKey: false });
 
 module.exports = model('User', userSchema);

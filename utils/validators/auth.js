@@ -28,3 +28,16 @@ exports.loginValidator = [
     body('email').isEmail().withMessage('Некорректный email').normalizeEmail(),
     body('password').isLength({min: 7, max: 20}).withMessage('Пароль должен содержать от 7 до 20 символов'),
 ];
+
+exports.resetPasswordValidator = [
+    body('email').isEmail().withMessage('Некорректный email').normalizeEmail()
+]
+
+exports.setPasswordValidator = [
+    body('password').isLength({min: 7, max: 20}).withMessage('Пароль должен содержать от 7 до 20 символов'),
+    body('passwordConfirm').custom(async (value, { req }) => {
+        if (value !== req.body.password) {
+            throw new Error('Пароли не совпадают')
+        }
+    })
+]
