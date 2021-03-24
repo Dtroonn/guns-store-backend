@@ -28,21 +28,6 @@ const userSchema = new Schema(
             body: String,
             expireAt: Date,
         },
-        cart: {
-            items: [
-                {
-                    count: {
-                        type: Number,
-                        default: 1,
-                    },
-                    gun: {
-                        type: Schema.Types.ObjectId,
-                        ref: 'Gun',
-                        required: true,
-                    },
-                },
-            ],
-        },
     },
     { versionKey: false },
 );

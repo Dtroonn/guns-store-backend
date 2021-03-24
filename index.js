@@ -33,6 +33,7 @@ app.use('/guns', require('./routes/guns'));
 app.use('/categories', require('./routes/categories'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/favorites', require('./routes/favorites'));
+app.use('/api/cart', require('./routes/cart'));
 
 async function start() {
     try {

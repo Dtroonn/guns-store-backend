@@ -2,7 +2,7 @@ const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
-const { User, Favorites } = require('../models');
+const { User, Favorites, Cart } = require('../models');
 const { transporter, registration, resetPassword, setPassword } = require('../emails');
 
 const generateToken = (size) => {
@@ -66,6 +66,9 @@ class AuthController {
 
             if (req.session.favoritesId) {
                 await Favorites.findByIdAndUpdate(req.session.favoritesId, { userId: user._id });
+            }
+            if (req.session.cartId) {
+                await Cart.findByIdAndUpdate(req.session.cartId, { userId: user._id });
             }
 
             req.session.userId = user._id;
