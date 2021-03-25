@@ -19,13 +19,10 @@ const generateToken = (size) => {
 class AuthController {
     async checkAuth(req, res) {
         try {
-            if (req.session.userId) {
-                const user = await User.findById(req.session.userId).select(
-                    '-emailConfirmationToken -password -passwordResetToken',
-                );
+            if (req.user) {
                 return res.status(200).json({
                     succes: true,
-                    data: user,
+                    data: req.user,
                 });
             }
             res.status(200).json({
@@ -50,7 +47,6 @@ class AuthController {
                 });
             }
 
-            //const passwordHash = await bcrypt.hash(password, 10);
             const emailConfirmationToken = await generateToken(32);
 
             const user = new User({

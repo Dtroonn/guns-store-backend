@@ -1,49 +1,11 @@
 const { Cart, Gun } = require('../models');
 
-const calculateFullPrice = (items) => {
-    return items.reduce(
-        (previousPrice, item) => previousPrice + item.count * item.product.price.current,
-        0,
-    );
-};
-
 class CartController {
     async get(req, res) {
         try {
-            if (!req.session.cartId && !req.session.userId) {
-                res.status(200).json({
-                    items: [],
-                    totalCount: 0,
-                    totalPrice: 0,
-                });
-            } else if (req.session.userId) {
-                const candidate = await Cart.findOne({ userId: req.session.userId })
-                    .select('-items._id -userId')
-                    .populate('items.product');
-
-                if (!candidate) {
-                    res.status(200).json({
-                        items: [],
-                        totalCount: 0,
-                        totalPrice: 0,
-                    });
-                } else {
-                    res.status(200).json({
-                        items: candidate.items,
-                        totalCount: candidate.totalCount,
-                        totalPrice: calculateFullPrice(candidate.items),
-                    });
-                }
-            } else {
-                const cart = await Cart.findById(req.session.cartId)
-                    .select('-items._id')
-                    .populate('items.product');
-                res.status(200).json({
-                    items: cart.items,
-                    totalCount: cart.totalCount,
-                    totalPrice: calculateFullPrice(cart.items),
-                });
-            }
+            res.status(200).json({
+                ...req.cart,
+            });
         } catch (e) {
             res.status(500).json({
                 succes: false,

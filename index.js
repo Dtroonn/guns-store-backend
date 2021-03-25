@@ -34,6 +34,9 @@ app.use('/categories', require('./routes/categories'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/favorites', require('./routes/favorites'));
 app.use('/api/cart', require('./routes/cart'));
+app.use('/api/orders', require('./routes/orders'));
+app.use('/api/recei-options', require('./routes/receiOptions'));
+app.use('/api/pay-options', require('./routes/payOptions'));
 
 async function start() {
     try {
@@ -41,6 +44,7 @@ async function start() {
             useNewUrlParser: true,
             useUnifiedTopology: true,
             useFindAndModify: false,
+            useCreateIndex: true,
         });
 
         app.listen(5555, () => {

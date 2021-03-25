@@ -1,10 +1,11 @@
 const { Router } = require('express');
 
 const { CartCntrl } = require('../controllers');
+const cart = require('../middleware/cart');
 
 const router = Router();
 
-router.get('/', CartCntrl.get);
+router.get('/', cart, CartCntrl.get);
 
 router.post('/:id', CartCntrl.add);
 

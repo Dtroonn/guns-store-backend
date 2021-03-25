@@ -1,11 +1,7 @@
 const { Schema, model } = require('mongoose');
 
-const orderSchema = newSchema(
+const orderSchema = new Schema(
     {
-        totalPrice: {
-            type: Number,
-            required: true,
-        },
         date: {
             type: Date,
             default: new Date(Date.now()),
@@ -22,6 +18,46 @@ const orderSchema = newSchema(
                 },
             },
         ],
+
+        totalPrice: {
+            type: Number,
+            required: true,
+        },
+
+        contactDetails: {
+            name: {
+                type: String,
+                required: true,
+            },
+            email: {
+                type: String,
+                required: true,
+                index: true,
+            },
+            phone: {
+                type: Number,
+                required: true,
+            },
+        },
+        delivery: {
+            adress: {
+                city: String,
+                street: String,
+                entrance: Number,
+                apartment: Number,
+            },
+            receiOption: {
+                type: Schema.Types.ObjectId,
+                ref: 'Recei-option',
+                required: true,
+            },
+            payOption: {
+                type: Schema.Types.ObjectId,
+                ref: 'Pay-option',
+                required: true,
+            },
+            comment: String,
+        },
     },
     { versionKey: false },
 );
