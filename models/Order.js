@@ -41,7 +41,10 @@ const orderSchema = new Schema(
         },
         delivery: {
             adress: {
-                city: String,
+                city: {
+                    type: String,
+                    required: true,
+                },
                 street: String,
                 entrance: Number,
                 apartment: Number,

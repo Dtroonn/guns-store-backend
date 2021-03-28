@@ -1,7 +1,5 @@
 const { body } = require('express-validator');
 
-const { ReceiOption, PayOption } = require('../../models');
-
 exports.createOrderValidator = [
     body('name')
         .notEmpty()
@@ -20,33 +18,9 @@ exports.createOrderValidator = [
         .isLength({ min: 7, max: 15 })
         .withMessage('phone must be between 7 and 15 characters'),
 
-    body('receiOption')
-        .notEmpty()
-        .withMessage('receiOption is required')
-        .custom(async (id) => {
-            try {
-                const candidate = await ReceiOption.findById(id);
-                if (!candidate) {
-                    return Promise.reject('incorrect recei option');
-                }
-            } catch (e) {
-                console.log(e);
-            }
-        }),
+    body('receiOptionId').notEmpty().withMessage('receiOptionId is required'),
 
-    body('payOption')
-        .notEmpty()
-        .withMessage('payOption is required')
-        .custom(async (id) => {
-            try {
-                const candidate = await PayOption.findById(id);
-                if (!candidate) {
-                    return Promise.reject('incorrect pay option');
-                }
-            } catch (e) {
-                console.log(e);
-            }
-        }),
+    body('payOptionId').notEmpty().withMessage('payOptionId is required'),
 
     body('city')
         .isString()
