@@ -1,35 +1,39 @@
-const {Category} = require('../models');
+var slugify = require('slugify');
+
+const { Category } = require('../models');
 
 class CategoryController {
-    async createCategory(req, res) {
+    async create(req, res) {
         try {
+            const slug = await slugify(req.body.name);
             const category = new Category({
                 name: req.body.name,
-            })
+                slug,
+            });
             await category.save();
             res.status(201).json({
-                succes: true
-            })
+                status: 'succes',
+            });
         } catch (e) {
             res.status(500).json({
-                succes: false,
+                status: 'error',
                 message: e,
-            })
+            });
         }
     }
 
-    async getCategories(req, res) {
+    async get(req, res) {
         try {
-            const categories = await Category.find().select('-__v');
+            const categories = await Category.find();
             res.status(200).json({
                 succes: true,
                 categories,
-            })
+            });
         } catch (e) {
             res.status(500).json({
                 succes: false,
                 message: e,
-            })
+            });
         }
     }
 }

@@ -7,11 +7,12 @@ class PayOptionController {
         try {
             const payOptions = await PayOption.find().lean();
             res.status(200).json({
+                status: 'succes',
                 items: payOptions,
             });
         } catch (e) {
             res.status(500).json({
-                succes: false,
+                status: 'error',
                 message: e.message,
             });
         }
@@ -20,25 +21,17 @@ class PayOptionController {
     async create(req, res) {
         const { title, description } = req.body;
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(422).json({
-                    succes: false,
-                    errors: errors.array(),
-                });
-            }
-
             const receiOption = new PayOption({
                 title,
                 description,
             });
             await receiOption.save();
-            res.status(200).json({
-                succes: true,
+            res.status(201).json({
+                status: 'succes',
             });
         } catch (e) {
             res.status(500).json({
-                succes: false,
+                status: 'error',
                 message: e.message,
             });
         }

@@ -1,9 +1,9 @@
 const { body } = require('express-validator');
 
+const { ReceiOption, PayOption } = require('../../models');
+
 exports.createOrderValidator = [
     body('name')
-        .notEmpty()
-        .withMessage('name is required')
         .isString()
         .withMessage('name must be string')
         .isLength({ min: 2, max: 20 })
@@ -17,10 +17,6 @@ exports.createOrderValidator = [
         .isNumeric('phone must contain only numbers')
         .isLength({ min: 7, max: 15 })
         .withMessage('phone must be between 7 and 15 characters'),
-
-    body('receiOptionId').notEmpty().withMessage('receiOptionId is required'),
-
-    body('payOptionId').notEmpty().withMessage('payOptionId is required'),
 
     body('city')
         .isString()
@@ -37,4 +33,33 @@ exports.createOrderValidator = [
         .withMessage('comment must be string')
         .isLength({ max: 500 })
         .withMessage('comment must not exceed 500 characters'),
+    body('receiOptionId')
+        .notEmpty()
+        .withMessage('receiOptionId is required')
+        .custom(async (value, { req }) => {
+            try {
+                const receiOption = await ReceiOption.findById(value).lean();
+                if (!receiOption) {
+                    return Promise.reject('recei option not found');
+                }
+                req.receiOption = receiOption;
+            } catch (e) {
+                console.log(e);
+            }
+        }),
+
+    body('payOptionId')
+        .notEmpty()
+        .withMessage('payOptionId is required')
+        .custom(async (value, { req }) => {
+            try {
+                const payOption = await PayOption.findById(value).lean();
+                if (!payOption) {
+                    return Promise.reject('pay option not found');
+                }
+                req.payOption = payOption;
+            } catch (e) {
+                console.log(e);
+            }
+        }),
 ];

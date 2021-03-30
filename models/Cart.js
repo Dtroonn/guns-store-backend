@@ -10,7 +10,7 @@ const cartSchema = new Schema(
             {
                 product: {
                     type: Schema.Types.ObjectId,
-                    ref: 'Gun',
+                    ref: 'Product',
                     required: true,
                 },
                 count: {
@@ -46,6 +46,12 @@ cartSchema.methods.removeItem = function (id) {
     const itemIndex = this.items.findIndex((item) => item.product.toString() === id.toString());
     this.totalCount -= this.items[itemIndex].count;
     this.items.splice(itemIndex, 1);
+    return this.save();
+};
+
+cartSchema.methods.clear = function () {
+    this.items = [];
+    this.totalCount = 0;
     return this.save();
 };
 

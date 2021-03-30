@@ -36,7 +36,7 @@ const createMessage = (order) => {
         `<b>Заказ</b>: {\n${order.items
             .map(
                 (item) =>
-                    `<i>Название:</i> ${item.product.name}, <i>Категория:</i> ${item.product.category}, <i>Кол-во:</i> ${item.count},`,
+                    `<i>Название:</i> ${item.product.name}, <i>Категория:</i> ${item.product.category.name}, <i>Кол-во:</i> ${item.count},`,
             )
             .join('\n')}\n}`,
         `<b>Общая цена:</b> ${order.totalPrice}`,

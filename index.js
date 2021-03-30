@@ -29,8 +29,8 @@ app.use(
     }),
 );
 
-app.use('/guns', require('./routes/guns'));
-app.use('/categories', require('./routes/categories'));
+app.use('/api/products', require('./routes/products'));
+app.use('/api/categories', require('./routes/categories'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/favorites', require('./routes/favorites'));
 app.use('/api/cart', require('./routes/cart'));

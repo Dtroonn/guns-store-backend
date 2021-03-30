@@ -1,7 +1,7 @@
 module.exports = {
-    Gun: require('./Gun'),
+    Product: require('./Product'),
     Category: require('./Category'),
-    RootDocumentForGuns: require('./RootDocumentForGuns'),
+    RootDocumentForProducts: require('./RootDocumentForProducts'),
     User: require('./User'),
     Favorites: require('./Favorites'),
     Cart: require('./Cart'),

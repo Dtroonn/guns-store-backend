@@ -9,22 +9,27 @@ const {
     setPasswordValidator,
     sendConfirmationEmailValidator,
 } = require('../utils/validators/auth');
+const { parallelValidate } = require('../middleware');
 
 const router = Router();
 
 router.get('/me', user, AuthCntrl.checkAuth);
 
-router.post('/register', registerValidator, AuthCntrl.register);
+router.post('/register', parallelValidate(registerValidator), AuthCntrl.register);
 
-router.post('/login', loginValidator, AuthCntrl.login);
+router.post('/login', parallelValidate(loginValidator), AuthCntrl.login);
 
 router.delete('/login', AuthCntrl.logout);
 
-router.post('/emailConfirmation', sendConfirmationEmailValidator, AuthCntrl.sendConfirmationEmail);
+router.post(
+    '/emailConfirmation',
+    parallelValidate(sendConfirmationEmailValidator),
+    AuthCntrl.sendConfirmationEmail,
+);
 router.post('/emailConfirmation/:token', AuthCntrl.confirmEmail);
 
-router.post('/resetPassword', resetPasswordValidator, AuthCntrl.resetPassword);
+router.post('/resetPassword', parallelValidate(resetPasswordValidator), AuthCntrl.resetPassword);
 router.get('/resetPassword/:token', AuthCntrl.checkPasswordResetToken);
-router.post('/resetPassword/:token', setPasswordValidator, AuthCntrl.setPassword);
+router.post('/resetPassword/:token', parallelValidate(setPasswordValidator), AuthCntrl.setPassword);
 
 module.exports = router;

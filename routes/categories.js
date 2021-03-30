@@ -1,12 +1,13 @@
 const { Router } = require('express');
 
-const {CategoryCntrl} = require('../controllers');
+const { CategoryCntrl } = require('../controllers');
+const { createCategoryValidator } = require('../utils/validators/category');
+const { parallelValidate } = require('../middleware');
 
 const router = Router();
 
-router.get('/', CategoryCntrl.getCategories);
+router.get('/', CategoryCntrl.get);
 
-router.post('/', CategoryCntrl.createCategory);
-
+router.post('/', parallelValidate(createCategoryValidator), CategoryCntrl.create);
 
 module.exports = router;

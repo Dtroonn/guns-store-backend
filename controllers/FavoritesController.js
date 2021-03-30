@@ -1,24 +1,26 @@
-const { Favorites, Gun } = require('../models');
+const { Favorites, Product } = require('../models');
 
 const addItemToFavorites = async (favorites, itemId, res) => {
     try {
         if (favorites.items.length === 10) {
-            return res.status(200).json({
-                succes: false,
+            return res.status(400).json({
+                status: 'error',
+                errorCode: 1,
                 message: 'maximum 10 products',
             });
         }
 
         if (favorites.items.includes(itemId)) {
-            return res.status(200).json({
-                succes: false,
+            return res.status(400).json({
+                status: 'error',
+                errorCode: 2,
                 message: 'product has already been added',
             });
         }
 
         await favorites.addItem(itemId);
         return res.status(200).json({
-            succes: true,
+            status: 'succes',
         });
     } catch (e) {
         throw e;
@@ -29,13 +31,13 @@ const removeItemFromFavorites = async (favorites, itemId, res) => {
     try {
         if (!favorites.items.includes(itemId)) {
             return res.status(200).json({
-                succes: true,
+                status: 'succes',
             });
         }
 
         await favorites.removeItem(itemId);
         return res.status(200).json({
-            succes: true,
+            status: 'succes',
         });
     } catch (e) {
         throw e;
@@ -47,26 +49,26 @@ class FavoritesController {
         const { favorites } = req;
         try {
             const favoritesObj = favorites.items.length
-                ? await favorites.execPopulate('items')
+                ? await favorites.execPopulate({
+                      path: 'items',
+                      populate: { path: 'category', select: '-_id -productsCount' },
+                  })
                 : favorites;
             res.status(200).json({
-                succes: true,
+                status: 'succes',
                 items: favoritesObj.items,
             });
-        } catch (e) {}
+        } catch (e) {
+            res.status(500).json({
+                status: 'error',
+                message: e.message,
+            });
+        }
     }
 
     async add(req, res) {
         const { id } = req.params;
         try {
-            const candidate = await Gun.findById(id);
-            if (!candidate) {
-                return res.status(404).json({
-                    succes: false,
-                    message: 'PRODUCT NOT FOUND',
-                });
-            }
-
             if (!req.session.userId) {
                 if (!req.session.favoritesId) {
                     const favorites = new Favorites({
@@ -79,7 +81,7 @@ class FavoritesController {
                             throw err;
                         }
                         res.status(200).json({
-                            succes: true,
+                            status: 'succes',
                         });
                     });
                 } else {
@@ -95,14 +97,14 @@ class FavoritesController {
                     });
                     await favorites.save();
                     return res.status(200).json({
-                        succes: true,
+                        status: 'succes',
                     });
                 }
                 await addItemToFavorites(candidate, id, res);
             }
         } catch (e) {
             res.status(500).json({
-                succes: false,
+                status: 'error',
                 message: e.message,
             });
         }
@@ -111,7 +113,7 @@ class FavoritesController {
     async remove(req, res) {
         const { id } = req.params;
         try {
-            const candidate = await Gun.findById(id);
+            const candidate = await Product.findById(id);
             if (!candidate) {
                 return res.status(404).json({
                     succes: false,

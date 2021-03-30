@@ -10,7 +10,8 @@ const favoritesSchema = new Schema(
         items: [
             {
                 type: Schema.Types.ObjectId,
-                ref: 'Gun',
+                ref: 'Product',
+                required: true,
             },
         ],
     },

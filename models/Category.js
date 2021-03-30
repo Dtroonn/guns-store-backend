@@ -1,24 +1,22 @@
-const {Schema, model} = require('mongoose');
+const { Schema, model } = require('mongoose');
 
-const categorySchema = new Schema({
-    name: {
-        type: String,
-        required: true
+const categorySchema = new Schema(
+    {
+        name: {
+            type: String,
+            required: true,
+        },
+        slug: {
+            type: String,
+            required: true,
+            index: true,
+        },
+        productsCount: {
+            type: Number,
+            default: 0,
+        },
     },
-    productsCount: {
-        type: Number,
-        default: 0,
-    },
-}); 
-
-categorySchema.method('toClient', function() {
-    var obj = this.toObject();
- 
-    //Rename fields
-    obj.id = obj._id;
-    delete obj._id;
- 
-    return obj; 
-}); 
+    { versionKey: false },
+);
 
 module.exports = model('Category', categorySchema);

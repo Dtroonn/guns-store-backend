@@ -7,11 +7,12 @@ class ReceiOptionController {
         try {
             const receiOptions = await ReceiOption.find().lean();
             res.status(200).json({
+                status: 'succes',
                 items: receiOptions,
             });
         } catch (e) {
             res.status(500).json({
-                succes: false,
+                status: 'error',
                 message: e.message,
             });
         }
@@ -34,12 +35,12 @@ class ReceiOptionController {
                 price,
             });
             await receiOption.save();
-            res.status(200).json({
-                succes: true,
+            res.status(201).json({
+                status: 'succes',
             });
         } catch (e) {
             res.status(500).json({
-                succes: false,
+                status: 'error',
                 message: e.message,
             });
         }

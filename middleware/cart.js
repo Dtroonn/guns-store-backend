@@ -20,8 +20,10 @@ module.exports = async function (req, res, next) {
         if (req.session.userId) {
             const candidate = await Cart.findOne({ userId: req.session.userId })
                 .select('-items._id -userId')
-                .populate('items.product')
-                .lean();
+                .populate({
+                    path: 'items.product',
+                    populate: { path: 'category', select: '-_id, -productsCount' },
+                });
 
             if (!candidate) {
                 req.cart = {
@@ -30,22 +32,20 @@ module.exports = async function (req, res, next) {
                     totalPrice: 0,
                 };
             } else {
-                req.cart = {
-                    ...candidate,
-                    totalPrice: calculateFullPrice(candidate.items),
-                };
+                candidate.totalPrice = calculateFullPrice(candidate.items);
+                req.cart = candidate;
             }
             return next();
         }
 
         const cart = await Cart.findById(req.session.cartId)
             .select('-items._id')
-            .populate('items.product')
-            .lean();
-        req.cart = {
-            ...cart,
-            totalPrice: calculateFullPrice(cart.items),
-        };
+            .populate({
+                path: 'items.product',
+                populate: { path: 'category', select: '-_id -productsCount' },
+            });
+        cart.totalPrice = calculateFullPrice(cart.items);
+        req.cart = cart;
         next();
     } catch (e) {
         res.status(500).json({

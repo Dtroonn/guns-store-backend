@@ -21,32 +21,25 @@ class AuthController {
         try {
             if (req.user) {
                 return res.status(200).json({
-                    succes: true,
+                    status: 'succes',
                     data: req.user,
                 });
             }
             res.status(200).json({
-                succes: false,
+                status: 'succes',
+                data: null,
             });
         } catch (e) {
             res.status(500).json({
-                succes: false,
+                status: 'error',
                 message: e.message,
             });
         }
     }
 
     async register(req, res) {
-        const { name, surname, email, password, passwordConfirm } = req.body;
+        const { name, surname, email, password } = req.body;
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(422).json({
-                    succes: false,
-                    message: errors.array()[0].msg,
-                });
-            }
-
             const emailConfirmationToken = await generateToken(32);
 
             const user = new User({
@@ -73,14 +66,14 @@ class AuthController {
                     throw err;
                 }
                 res.status(200).json({
-                    succes: true,
+                    status: 'succes',
                 });
             });
 
             transporter.sendMail(registration(email, emailConfirmationToken));
         } catch (e) {
             res.status(500).json({
-                succes: false,
+                status: 'error',
                 message: e.message,
             });
         }
@@ -89,15 +82,7 @@ class AuthController {
     async login(req, res) {
         const { email, password } = req.body;
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(422).json({
-                    succes: false,
-                    message: errors.array()[0].msg,
-                });
-            }
-
-            const candidate = await User.findOne({ email: email });
+            const candidate = await User.findOne({ email: email }).lean();
             if (candidate) {
                 const areSame = await bcrypt.compare(password, candidate.password);
                 if (areSame) {
@@ -107,23 +92,23 @@ class AuthController {
                             throw err;
                         }
                         res.status(200).json({
-                            succes: true,
+                            status: 'succes',
                         });
                     });
                 }
-                res.status(200).json({
-                    succes: false,
-                    message: 'Неверный логин или пароль',
+                res.status(401).json({
+                    status: 'error',
+                    message: 'incorrect email or password',
                 });
             } else {
-                res.status(200).json({
-                    succes: false,
-                    message: 'Неверный логин или пароль',
+                res.status(401).json({
+                    status: 'error',
+                    message: 'incorrect email or password',
                 });
             }
         } catch (e) {
             res.status(500).json({
-                succes: false,
+                status: 'error',
                 message: e.message,
             });
         }
@@ -133,37 +118,31 @@ class AuthController {
         req.session.destroy((err) => {
             if (err) {
                 return res.status(500).json({
-                    succes: false,
+                    status: 'error',
                     message: err.message,
                 });
             }
             res.status(200).json({
-                succes: true,
+                status: 'succes',
             });
         });
     }
 
     async sendConfirmationEmail(req, res) {
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(422).json({
-                    succes: false,
-                    message: errors.array()[0].msg,
-                });
-            }
-
             const candidate = await User.findOne({ email: req.body.email });
             if (!candidate) {
-                return res.status(404).json({
-                    succes: false,
-                    message: 'Пользователь с такой почтой не найден',
+                return res.status(422).json({
+                    status: 'error',
+                    errorCode: 1,
+                    message: 'user with such mail was not found',
                 });
             }
             if (candidate.isEmailConfirmed) {
-                return res.status(200).json({
-                    succes: false,
-                    message: 'Почта уже подтверждена',
+                return res.status(422).json({
+                    status: 'error',
+                    errorCode: 2,
+                    message: 'email has already been confirmed',
                 });
             }
 
@@ -172,13 +151,13 @@ class AuthController {
 
             await candidate.save();
             res.status(200).json({
-                succes: true,
+                status: 'succes',
             });
 
             transporter.sendMail(registration(candidate.email, emailConfirmationToken));
         } catch (e) {
             res.status(500).json({
-                succes: false,
+                status: 'error',
                 message: e.message,
             });
         }
@@ -188,9 +167,9 @@ class AuthController {
         try {
             const candidate = await User.findOne({ emailConfirmationToken: req.params.token });
             if (!candidate) {
-                return res.status(404).json({
-                    succes: false,
-                    message: 'TOKEN NOT FOUND',
+                return res.status(400).json({
+                    status: 'error',
+                    message: 'token not found',
                 });
             }
 
@@ -199,48 +178,34 @@ class AuthController {
             await candidate.save();
 
             res.status(200).json({
-                succes: true,
+                status: 'succes',
             });
         } catch (e) {
             res.status(500).json({
-                succes: false,
+                status: 'error',
                 message: e.message,
             });
         }
     }
 
     async resetPassword(req, res) {
+        const { user } = req;
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(422).json({
-                    succes: false,
-                    message: errors.array()[0].msg,
-                });
-            }
-
-            const candidate = await User.findOne({ email: req.body.email });
-            if (!candidate) {
-                return res.status(404).json({
-                    succes: false,
-                    message: 'Пользователь не найден',
-                });
-            }
             if (
-                candidate.passwordResetToken.expireAt &&
-                !(candidate.passwordResetToken.expireAt - Date.now() < 0)
+                user.usepasswordResetToken.expireAt &&
+                !(user.passwordResetToken.expireAt - Date.now() < 0)
             ) {
-                return res.status(200).json({
-                    succes: false,
-                    message: 'Невозможно запросить новый токен за такой промежуток времени',
+                return res.status(400).json({
+                    status: 'error',
+                    message: 'you cannot request a new token in such a period of time',
                 });
             }
             const passwordResetToken = await generateToken(32);
-            candidate.passwordResetToken.body = passwordResetToken;
-            candidate.passwordResetToken.expireAt = new Date(Date.now() + 60000 * 15);
+            user.passwordResetToken.body = passwordResetToken;
+            user.passwordResetToken.expireAt = new Date(Date.now() + 60000 * 15);
             await candidate.save();
             res.status(200).json({
-                succes: true,
+                status: 'succes',
             });
 
             transporter.sendMail(
@@ -248,7 +213,7 @@ class AuthController {
             );
         } catch (e) {
             res.status(500).json({
-                succes: false,
+                status: 'error',
                 message: e.message,
             });
         }
@@ -260,37 +225,30 @@ class AuthController {
             if (candidate) {
                 if (candidate.passwordResetToken.expireAt > Date.now()) {
                     return res.status(200).json({
-                        succes: true,
+                        status: 'succes',
                     });
                 }
-                res.status(200).json({
-                    succes: false,
-                    message: 'Время действия токена истекло',
+                res.status(400).json({
+                    status: 'error',
+                    message: 'token has expired',
                 });
             } else {
                 res.status(404).json({
-                    succes: false,
-                    message: 'Токен не найден',
+                    status: 'error',
+                    message: 'token not found',
                 });
             }
         } catch (e) {
             res.status(500).json({
-                succes: false,
+                status: 'error',
                 message: e.message,
             });
         }
     }
 
     async setPassword(req, res) {
-        const { password, passwordConfirm } = req.body;
+        const { password } = req.body;
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(422).json({
-                    succes: false,
-                    message: errors.array()[0].msg,
-                });
-            }
             const candidate = await User.findOne({ 'passwordResetToken.body': req.params.token });
             const store = req.sessionStore;
             const sessions = store.db.collection('sessions');
@@ -311,24 +269,26 @@ class AuthController {
                         });
                     });
                     res.status(200).json({
-                        succes: true,
+                        status: 'succes',
                     });
 
                     return transporter.sendMail(setPassword(candidate.email, candidate.name));
                 }
-                res.status(200).json({
-                    succes: false,
-                    message: 'Время действия токена истекло',
+                res.status(400).json({
+                    status: 'error',
+                    errorCode: 1,
+                    message: 'token has expired',
                 });
             } else {
-                res.status(404).json({
-                    succes: false,
-                    message: 'Токен не найден',
+                res.status(400).json({
+                    status: 'error',
+                    errorCode: 2,
+                    message: 'token not found',
                 });
             }
         } catch (e) {
             res.status(500).json({
-                succes: false,
+                status: 'error',
                 message: e.message,
             });
         }

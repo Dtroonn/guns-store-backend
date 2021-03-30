@@ -1,14 +1,17 @@
 const { Router } = require('express');
 
 const { CartCntrl } = require('../controllers');
-const cart = require('../middleware/cart');
+const { cart, parallelValidate } = require('../middleware');
+const { addToCartValidator, removeFromCartValidator } = require('../utils/validators/cart');
 
 const router = Router();
 
 router.get('/', cart, CartCntrl.get);
 
-router.post('/:id', CartCntrl.add);
+router.post('/:id', addToCartValidator, CartCntrl.add);
 
-router.delete('/:id', CartCntrl.remove);
+router.delete('/:id', parallelValidate(removeFromCartValidator, 400), CartCntrl.remove);
+
+router.delete('/', CartCntrl.clear);
 
 module.exports = router;

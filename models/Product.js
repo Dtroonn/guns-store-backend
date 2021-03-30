@@ -1,6 +1,6 @@
 const { Schema, model } = require('mongoose');
 
-const gunSchema = new Schema(
+const productSchema = new Schema(
     {
         name: {
             type: String,
@@ -21,13 +21,12 @@ const gunSchema = new Schema(
             required: true,
             default: 'lalka',
         },
-        categories: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: 'Category',
-                required: true,
-            },
-        ],
+        category: {
+            type: Schema.Types.ObjectId,
+            ref: 'Category',
+            required: true,
+        },
+
         count: {
             type: Number,
             required: true,
@@ -36,13 +35,4 @@ const gunSchema = new Schema(
     { versionKey: false },
 );
 
-// gunSchema.method('toClient', function() {
-//     let obj = this.toObject();
-
-//
-//     obj.id = obj._id;
-//     delete obj._id;
-//     return obj;
-// });
-
-module.exports = model('Gun', gunSchema);
+module.exports = model('Product', productSchema);

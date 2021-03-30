@@ -1,4 +1,4 @@
-const GunController = require('./GunController');
+const ProductController = require('./ProductController');
 const CategoryController = require('./CategoryController');
 const AuthController = require('./AuthController');
 const FavoritesController = require('./FavoritesController');
@@ -8,7 +8,7 @@ const ReceiOptionController = require('./ReceiOptionController');
 const PayOptionController = require('./PayOptionController');
 
 module.exports = {
-    GunCntrl: new GunController(),
+    ProductCntrl: new ProductController(),
     CategoryCntrl: new CategoryController(),
     AuthCntrl: new AuthController(),
     FavoritesCntrl: new FavoritesController(),
