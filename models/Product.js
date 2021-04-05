@@ -10,10 +10,12 @@ const productSchema = new Schema(
             current: {
                 type: Number,
                 required: true,
+                index: true,
             },
             old: {
                 type: Number,
                 default: null,
+                index: true,
             },
         },
         imgUrl: {
@@ -25,6 +27,23 @@ const productSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: 'Category',
             required: true,
+            index: true,
+        },
+        type: {
+            type: Schema.Types.ObjectId,
+            ref: 'Type',
+            index: true,
+        },
+        kind: {
+            type: Schema.Types.ObjectId,
+            ref: 'Kind',
+            index: true,
+        },
+        rating: {
+            type: Number,
+            required: true,
+            default: 0,
+            index: true,
         },
 
         count: {

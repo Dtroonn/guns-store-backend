@@ -1,6 +1,4 @@
-const { validationResult } = require('express-validator');
-
-const { Product, Category, RootDocumentForProducts } = require('../models');
+const { Product, Category, Type, Kind } = require('../models');
 const cloudinary = require('../utils/cloudinary');
 
 const markFavoritesProducts = (items, favoritesItems) => {
@@ -14,34 +12,40 @@ const getSkip = (page, count) => {
     return count * (page - 1);
 };
 
-class GunController {
+class ProductController {
     async create(req, res) {
-        const { name, price, count } = req.body;
-        console.log(price);
+        const { name, currentPrice, oldPrice, count, rating } = req.body;
         try {
-            // const uploadedResult = await cloudinary.uploader.upload(req.body.base64EncodedImage, {
-            //     folder: 'guns',
-            // });
+            const uploadedResult = await cloudinary.uploader.upload(req.file.path, {
+                folder: 'papigun',
+                format: 'webp',
+            });
 
             const product = new Product({
                 name,
-                price,
-                imgUrl: 'lalka',
-                category: req.category._id,
+                price: {
+                    current: currentPrice,
+                    old: oldPrice,
+                },
+                imgUrl: uploadedResult.secure_url,
+                category: req.category,
+                type: req.type,
+                kind: req.kind,
+                rating,
                 count,
             });
             await product.save();
 
-            const rootDocumentForProducts = await RootDocumentForProducts.findOne();
-
             await Promise.all([
-                rootDocumentForProducts.addToItems(product),
-                Category.findByIdAndUpdate(
-                    { _id: req.category._id },
-                    {
-                        $inc: { productsCount: 1 },
-                    },
-                ),
+                Category.findByIdAndUpdate(req.category, {
+                    $inc: { productsCount: 1 },
+                }),
+                Type.findByIdAndUpdate(req.type, {
+                    $inc: { productsCount: 1 },
+                }),
+                Kind.findByIdAndUpdate(req.kind, {
+                    $inc: { productsCount: 1 },
+                }),
             ]);
 
             res.status(201).json({
@@ -56,61 +60,31 @@ class GunController {
     }
 
     async get(req, res) {
-        const { page, count } = req.query;
+        const { page, count, sale } = req.query;
+        let findObj = {};
+        if (req.category) {
+            findObj.category = req.category;
+        }
+        if (req.types) {
+            findObj.type = req.types;
+        }
+        if (req.kinds) {
+            findObj.kind = req.kinds;
+        }
+        if (sale) {
+            findObj['price.old'] = { $ne: null };
+        }
         try {
-            if (req.category && !req.sort) {
-                // const rootDocumentForGuns = await RootDocumentForGuns.aggregate([
-                //     {$lookup: {
-                //         from: 'guns', localField: 'items', foreignField: '_id', as: 'items'
-                //     } },
-                //     { $unwind: '$items'},
-                //     { $match: {'items.categories': {$in: categoriesIds}} },
-                //     {$lookup: {
-                //         from: 'categories', localField: 'items.categories', foreignField: '_id', as: 'categories'
-                //     } },
-                //     {$addFields: {
-                //         'items.categories': '$categories'
-                //     } },
-                //     {$group : {
-                //         _id: "$_id",
-                //         items: {$push: '$items'}
-                //     } },
-                //     {$project: {
-                //         totalCount: { $size: '$items' },
-                //         items: { $slice: ['$items', getSkip(page, count), count]},
-                //     }},
-                // ]);
-                // const guns = mapToGuns(rootDocumentForGuns[0].items);
-
-                const promiseProducts = await Product.find({ category: req.category._id })
-                    .populate({ path: 'category', select: '-_id' })
-                    .skip(getSkip(page, count))
-                    .limit(count)
-                    .lean();
-
-                const [items, totalCount] = await Promise.all([
-                    promiseProducts,
-                    Product.countDocuments({ category: req.category._id }),
-                ]);
-                const products = markFavoritesProducts(items, req.favorites.items);
-
-                return res.status(200).json({
-                    status: 'succes',
-                    items: products,
-                    totalCount,
-                });
-            }
-
-            if (req.sort && !req.category) {
-                const promiseProducts = await Product.find()
+            if (req.sort) {
+                const promiseProducts = await Product.find(findObj)
                     .sort({ [req.sort.type]: req.sort.direction })
-                    .populate('category, -_id')
+                    .populate('category type kind', '-_id -productsCount -category')
                     .skip(getSkip(page, count))
                     .limit(count)
                     .lean();
                 const [items, totalCount] = await Promise.all([
                     promiseProducts,
-                    Product.countDocuments(),
+                    Product.countDocuments(findObj),
                 ]);
                 const products = markFavoritesProducts(items, req.favorites.items);
                 return res.status(200).json({
@@ -120,38 +94,22 @@ class GunController {
                 });
             }
 
-            if (req.sort && req.category) {
-                const promiseProducts = Product.find({ category: req.category._id })
-                    .sort({ [req.sort.type]: req.sort.direction })
-                    .populate('category', '-_id')
-                    .skip(getSkip(page, count))
-                    .limit(count)
-                    .lean();
-
-                const [items, totalCount] = await Promise.all([
-                    promiseProducts,
-                    Product.countDocuments({ category: req.category._id }),
-                ]);
-                const products = markFavoritesProducts(items, req.favorites.items);
-                return res.status(200).json({
-                    status: 'succes',
-                    items: products,
-                    totalCount,
-                });
-            }
-            const rootDocumentForProducts = await RootDocumentForProducts.findOne()
-                .populate({ path: 'items', populate: { path: 'category', select: '-_id' } })
-                .slice('items', [getSkip(page, count), count])
+            const promiseProducts = Product.find(findObj)
+                .populate('category type kind', '-_id -productsCount -category')
+                .skip(getSkip(page, count))
+                .limit(count)
                 .lean();
 
-            const products = markFavoritesProducts(
-                rootDocumentForProducts.items,
-                req.favorites.items,
-            );
-            res.status(200).json({
+            const [items, totalCount] = await Promise.all([
+                promiseProducts,
+                Product.countDocuments(findObj),
+            ]);
+            const products = markFavoritesProducts(items, req.favorites.items);
+
+            return res.status(200).json({
                 status: 'succes',
                 items: products,
-                totalCount: rootDocumentForProducts.totalCount,
+                totalCount,
             });
         } catch (e) {
             console.log(e);
@@ -163,4 +121,4 @@ class GunController {
     }
 }
 
-module.exports = GunController;
+module.exports = ProductController;

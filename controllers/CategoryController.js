@@ -1,4 +1,4 @@
-var slugify = require('slugify');
+const slugify = require('slugify');
 
 const { Category } = require('../models');
 

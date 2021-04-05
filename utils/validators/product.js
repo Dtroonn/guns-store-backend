@@ -1,12 +1,12 @@
 const { body, query } = require('express-validator');
 
-const { Category } = require('../../models');
+const { Category, Type, Kind } = require('../../models');
 
 const checkCategoryBySlug = async (value, { req }) => {
     try {
-        candidate = await Category.findOne({ slug: value }).lean();
+        candidate = await Category.findOne({ slug: value }).select('_id').lean();
         if (!candidate) {
-            return Promise.reject('incorrect category');
+            return Promise.reject('category not found');
         }
         req.category = candidate;
     } catch (e) {
@@ -18,27 +18,22 @@ exports.createProductValidator = [
     body('name')
         .isString()
         .withMessage('name must be string')
-        .isLength({ min: 2, max: 20 })
-        .withMessage('Имя должно содержать от 2 до 20 символов')
-        .toLowerCase(),
+        .isLength({ min: 2, max: 40 })
+        .withMessage('name must be between 2 and 40 characters'),
 
-    body('price.current')
+    body('currentPrice')
         .notEmpty()
-        .withMessage('Цена не должна быть пустой')
+        .withMessage('current price is required')
         .isNumeric()
-        .withMessage('Цена должна содержать только цифры'),
+        .withMessage('current price must be number'),
 
-    body('price.old')
-        .optional()
-        .isNumeric()
-        .withMessage('Старая цена должна содержать только цифры'),
-    body('base64EncodedImage').optional().isString().withMessage('Неверный base64EncodedImage'),
+    body('oldPrice').optional().isNumeric().withMessage('old price must be number'),
 
     body('count')
         .notEmpty()
-        .withMessage('Количество товара не должно быть пустым')
+        .withMessage('count is required')
         .isNumeric()
-        .withMessage('Поле должно содержать только цифры')
+        .withMessage('count must be number')
         .isFloat({ min: 0 })
         .withMessage('min value count is 0'),
 
@@ -49,11 +44,53 @@ exports.createProductValidator = [
         .withMessage('category must be string')
         .toLowerCase()
         .custom(checkCategoryBySlug),
+
+    body('type')
+        .optional()
+        .isString()
+        .withMessage('type must be string')
+        .toLowerCase()
+        .custom(async (value, { req }) => {
+            try {
+                candidate = await Type.findOne({ slug: value }).select('_id').lean();
+                if (!candidate) {
+                    return Promise.reject('type not found');
+                }
+                req.type = candidate;
+            } catch (e) {
+                console.log(e);
+            }
+        }),
+
+    body('kind')
+        .optional()
+        .isString()
+        .withMessage('kind must be string')
+        .toLowerCase()
+        .custom(async (value, { req }) => {
+            try {
+                candidate = await Kind.findOne({ slug: value }).select('_id').lean();
+                if (!candidate) {
+                    return Promise.reject('kind not found');
+                }
+                req.kind = candidate;
+            } catch (e) {
+                console.log(e);
+            }
+        }),
+
+    body('rating')
+        .optional()
+        .isNumeric()
+        .withMessage('rating must be number')
+        .isFloat({ min: 0, max: 5 })
+        .withMessage('rating must be range 0 and 5'),
 ];
 
 exports.getProductsValidator = [
     query('page')
         .default(1)
+        .toInt()
         .isNumeric()
         .withMessage('page must be number')
         .isFloat({ min: 1 })
@@ -61,6 +98,7 @@ exports.getProductsValidator = [
 
     query('count')
         .default(10)
+        .toInt()
         .isNumeric()
         .withMessage('count must be number')
         .isFloat({ min: 5, max: 20 })
@@ -88,10 +126,50 @@ exports.getProductsValidator = [
             }
         }),
 
-    query('category').optional().toLowerCase().custom(checkCategoryBySlug),
+    query('sale').default(false).toBoolean(),
+
+    query('category')
+        .optional()
+        .isString()
+        .withMessage('category must be string')
+        .toLowerCase()
+        .custom(checkCategoryBySlug),
 
     query('type')
         .optional()
+        .isString()
+        .withMessage('type must be string')
         .toLowerCase()
-        .custom(async (value, { req }) => {}),
+        .custom(async (value, { req }) => {
+            try {
+                const slugsArray = value.split(',');
+                const candidates = await Type.find({ slug: slugsArray }).select('_id').lean();
+                if (slugsArray.length !== candidates.length) {
+                    return Promise.reject('type not found');
+                }
+                req.types = candidates;
+            } catch (e) {
+                console.log(e);
+            }
+        }),
+
+    query('kind')
+        .optional()
+        .isString()
+        .withMessage('kind must be string')
+        .toLowerCase()
+        .custom(async (value, { req }) => {
+            try {
+                const slugsArray = value.split(',');
+
+                const candidates = await Kind.find({ slug: slugsArray }).select('_id').lean();
+
+                if (slugsArray.length !== candidates.length) {
+                    return Promise.reject('kind not found');
+                }
+                req.kinds = candidates;
+            } catch (e) {
+                console.log(e);
+            }
+        }),
 ];

@@ -6,6 +6,9 @@ const CartController = require('./CartController');
 const OrderController = require('./OrderController');
 const ReceiOptionController = require('./ReceiOptionController');
 const PayOptionController = require('./PayOptionController');
+const TypeController = require('./TypeController');
+const KindController = require('./KindController');
+const FilterController = require('./FilterController');
 
 module.exports = {
     ProductCntrl: new ProductController(),
@@ -16,4 +19,7 @@ module.exports = {
     OrderCntrl: new OrderController(),
     ReceiOptionCntrl: new ReceiOptionController(),
     PayOptionCntrl: new PayOptionController(),
+    TypeCntrl: new TypeController(),
+    FilterCntrl: new FilterController(),
+    KindCntrl: new KindController(),
 };
