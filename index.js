@@ -26,6 +26,7 @@ app.use(
         cookie: {
             maxAge: 31536000000,
             secure: true,
+            sameSite: 'none',
         },
         store,
     }),
