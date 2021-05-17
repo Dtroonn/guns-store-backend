@@ -1,7 +1,7 @@
 const { Router } = require('express');
 
 const { PayOptionCntrl } = require('../controllers');
-const { createPayOptionValidator } = require('../utils/validators/PayOption');
+const { createPayOptionValidator } = require('../utils/validators/payOption');
 const { parallelValidate } = require('../middleware');
 
 const router = Router();
