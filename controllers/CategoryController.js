@@ -5,7 +5,7 @@ const { Category } = require('../models');
 class CategoryController {
     async create(req, res) {
         try {
-            const slug = await slugify(req.body.name);
+            const slug = await slugify(req.body.name, { lower: true });
             const category = new Category({
                 name: req.body.name,
                 slug,
@@ -26,12 +26,12 @@ class CategoryController {
         try {
             const categories = await Category.find();
             res.status(200).json({
-                succes: true,
-                categories,
+                status: 'succes',
+                items: categories,
             });
         } catch (e) {
             res.status(500).json({
-                succes: false,
+                status: 'error',
                 message: e,
             });
         }

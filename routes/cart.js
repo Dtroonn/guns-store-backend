@@ -8,7 +8,7 @@ const router = Router();
 
 router.get('/', cart, CartCntrl.get);
 
-router.post('/:id', addToCartValidator, CartCntrl.add);
+router.post('/:id', parallelValidate(addToCartValidator, 400), CartCntrl.add);
 
 router.delete('/:id', parallelValidate(removeFromCartValidator, 400), CartCntrl.remove);
 

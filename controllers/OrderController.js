@@ -30,7 +30,7 @@ class OrderController {
     }
 
     async create(req, res) {
-        const { email, name, phone } = req.body;
+        const { email, name, tel } = req.body;
         try {
             if (!req.cart.totalCount) {
                 return res.status(400).json({
@@ -40,9 +40,16 @@ class OrderController {
                 });
             }
 
-            if (req.cart.items.some((item) => item.product.count < item.count)) {
+            let deficiencyProducts = [];
+            req.cart.items.forEach((item) => {
+                if (item.product.count < item.count) {
+                    deficiencyProducts.push(item.product);
+                }
+            });
+            if (deficiencyProducts.length > 0) {
                 return res.status(400).json({
                     status: 'error',
+                    items: deficiencyProducts,
                     errorCode: 2,
                     message: 'some items are out of stock or not enough',
                 });
@@ -54,7 +61,7 @@ class OrderController {
                 contactDetails: {
                     name,
                     email,
-                    phone,
+                    tel,
                 },
                 delivery: {
                     receiOption: req.receiOption._id,

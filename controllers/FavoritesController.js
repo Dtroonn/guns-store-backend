@@ -1,6 +1,6 @@
 const { Favorites, Product } = require('../models');
 
-const addItemToFavorites = async (favorites, itemId, res) => {
+const addItemToFavorites = async (favorites, itemId, product, res) => {
     try {
         if (favorites.items.length === 10) {
             return res.status(400).json({
@@ -21,6 +21,7 @@ const addItemToFavorites = async (favorites, itemId, res) => {
         await favorites.addItem(itemId);
         return res.status(200).json({
             status: 'succes',
+            data: product,
         });
     } catch (e) {
         throw e;
@@ -48,15 +49,9 @@ class FavoritesController {
     async get(req, res) {
         const { favorites } = req;
         try {
-            const favoritesObj = favorites.items.length
-                ? await favorites.execPopulate({
-                      path: 'items',
-                      populate: { path: 'category', select: '-_id -productsCount' },
-                  })
-                : favorites;
             res.status(200).json({
                 status: 'succes',
-                items: favoritesObj.items,
+                items: favorites.items,
             });
         } catch (e) {
             res.status(500).json({
@@ -68,6 +63,7 @@ class FavoritesController {
 
     async add(req, res) {
         const { id } = req.params;
+        const { product } = req;
         try {
             if (!req.session.userId) {
                 if (!req.session.favoritesId) {
@@ -82,11 +78,12 @@ class FavoritesController {
                         }
                         res.status(200).json({
                             status: 'succes',
+                            data: product,
                         });
                     });
                 } else {
                     const favorites = await Favorites.findById(req.session.favoritesId);
-                    await addItemToFavorites(favorites, id, res);
+                    await addItemToFavorites(favorites, id, product, res);
                 }
             } else {
                 const candidate = await Favorites.findOne({ userId: req.session.userId });
@@ -98,9 +95,10 @@ class FavoritesController {
                     await favorites.save();
                     return res.status(200).json({
                         status: 'succes',
+                        data: product,
                     });
                 }
-                await addItemToFavorites(candidate, id, res);
+                await addItemToFavorites(candidate, id, product, res);
             }
         } catch (e) {
             res.status(500).json({

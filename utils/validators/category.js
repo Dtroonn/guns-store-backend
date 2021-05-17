@@ -5,6 +5,5 @@ exports.createCategoryValidator = [
         .isString()
         .withMessage('name must be string')
         .isLength({ min: 2, max: 45 })
-        .withMessage('name must be between 2 and 45 characters')
-        .toLowerCase(),
+        .withMessage('name must be between 2 and 45 characters'),
 ];

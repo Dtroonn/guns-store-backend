@@ -1,9 +1,9 @@
-const { query, param } = require('express-validator');
+const { body, param } = require('express-validator');
 
 const { Product } = require('../../models');
 
 exports.addToCartValidator = [
-    query('count')
+    body('count')
         .default(1)
         .toInt()
         .isNumeric()
@@ -11,22 +11,7 @@ exports.addToCartValidator = [
         .isFloat({ min: 1 })
         .withMessage('min value count is 1'),
 
-    param('id')
-        .notEmpty()
-        .withMessage('id is required')
-        .custom(async (value, { req }) => {
-            try {
-                const candidate = await Product.findById(value).lean();
-                if (!candidate) {
-                    return Promise.reject('product not found');
-                }
-                if (candidate.count < req.query.count) {
-                    return Promise.reject('some items are out of stock or not enough');
-                }
-            } catch (e) {
-                console.log(e);
-            }
-        }),
+    param('id').notEmpty().withMessage('id is required'),
 ];
 
 exports.removeFromCartValidator = [

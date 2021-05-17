@@ -6,13 +6,13 @@ exports.addRemoveFavoritesValidagor = [
     param('id')
         .notEmpty()
         .withMessage('id is required')
-        .custom(async (value) => {
+        .custom(async (value, { req }) => {
             try {
                 const candidate = await Product.findById(value).lean();
-                console.log(candidate);
                 if (!candidate) {
                     return Promise.reject('product not found');
                 }
+                req.product = candidate;
             } catch (e) {
                 console.log(e);
             }

@@ -1,5 +1,3 @@
-const { validationResult } = require('express-validator');
-
 const { Cart, Product } = require('../models');
 
 class CartController {
@@ -7,9 +5,11 @@ class CartController {
         try {
             res.status(200).json({
                 status: 'succes',
-                items: req.cart.items,
-                totalCount: req.cart.totalCount,
-                totalPrice: req.cart.totalPrice,
+                data: {
+                    items: req.cart.items,
+                    totalCount: req.cart.totalCount,
+                    totalPrice: req.cart.totalPrice,
+                },
             });
         } catch (e) {
             res.status(500).json({
@@ -21,14 +21,23 @@ class CartController {
 
     async add(req, res) {
         const { id } = req.params;
-        const { count } = req.query;
-        console.log(count);
+        const { count } = req.body;
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
+            const candidate = await Product.findById(id).lean();
+            if (!candidate) {
                 return res.status(400).json({
                     status: 'error',
-                    errors: errors.array(),
+                    errorCode: 1,
+                    message: 'product not found',
+                });
+            }
+
+            if (count > candidate.count) {
+                return res.status(400).json({
+                    status: 'error',
+                    errorCode: 2,
+                    data: candidate,
+                    message: 'not enough item count',
                 });
             }
 
@@ -51,6 +60,7 @@ class CartController {
                         }
                         res.status(200).json({
                             status: 'succes',
+                            data: candidate,
                         });
                     });
                 } else {
@@ -58,6 +68,7 @@ class CartController {
                     await cart.addItem(id, count);
                     res.status(200).json({
                         status: 'succes',
+                        data: candidate,
                     });
                 }
             } else {
@@ -76,11 +87,13 @@ class CartController {
                     await cart.save();
                     return res.status(200).json({
                         status: 'succes',
+                        data: candidate,
                     });
                 }
                 await candidate.addItem(id, count);
                 res.status(200).json({
                     status: 'succes',
+                    data: candidate,
                 });
             }
         } catch (e) {

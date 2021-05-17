@@ -7,10 +7,9 @@ module.exports = async function (req, res, next) {
             return next();
         }
         if (req.session.userId) {
-            const candidate = await Favorites.findOne({ userId: req.session.userId }).select(
-                'items',
-            );
-
+            const candidate = await Favorites.findOne({ userId: req.session.userId })
+                .populate('items')
+                .select('items');
             if (!candidate) {
                 req.favorites = { items: [] };
             } else {
@@ -19,7 +18,7 @@ module.exports = async function (req, res, next) {
             return next();
         }
 
-        const favorites = await Favorites.findById(req.session.favoritesId);
+        const favorites = await Favorites.findById(req.session.favoritesId).populate('items');
         req.favorites = favorites;
         next();
     } catch (e) {

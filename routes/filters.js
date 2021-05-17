@@ -6,6 +6,6 @@ const { FilterCntrl } = require('../controllers');
 
 const router = Router();
 
-router.get('/:category', parallelValidate(getFilterValidator, 400), FilterCntrl.get);
+router.get('/:category?', parallelValidate(getFilterValidator, 400), FilterCntrl.get);
 
 module.exports = router;

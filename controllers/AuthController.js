@@ -48,8 +48,6 @@ class AuthController {
                 email,
                 emailConfirmationToken,
                 password,
-                cart: { items: [] },
-                favorites: [],
             });
             await user.save();
 

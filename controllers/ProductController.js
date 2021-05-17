@@ -1,13 +1,6 @@
 const { Product, Category, Type, Kind } = require('../models');
 const cloudinary = require('../utils/cloudinary');
 
-const markFavoritesProducts = (items, favoritesItems) => {
-    return items.map((item) => ({
-        ...item,
-        isFavorite: favoritesItems.includes(item._id),
-    }));
-};
-
 const getSkip = (page, count) => {
     return count * (page - 1);
 };
@@ -74,6 +67,13 @@ class ProductController {
         if (sale) {
             findObj['price.old'] = { $ne: null };
         }
+        if (req.price) {
+            findObj['price.current'] = { $gte: req.price.min, $lte: req.price.max };
+        }
+        if (req.query.search) {
+            findObj.name = { $regex: new RegExp(`${req.query.search}`), $options: 'i' };
+        }
+
         try {
             if (req.sort) {
                 const promiseProducts = await Product.find(findObj)
@@ -82,11 +82,11 @@ class ProductController {
                     .skip(getSkip(page, count))
                     .limit(count)
                     .lean();
-                const [items, totalCount] = await Promise.all([
+                const [products, totalCount] = await Promise.all([
                     promiseProducts,
                     Product.countDocuments(findObj),
                 ]);
-                const products = markFavoritesProducts(items, req.favorites.items);
+
                 return res.status(200).json({
                     status: 'succes',
                     items: products,
@@ -100,11 +100,10 @@ class ProductController {
                 .limit(count)
                 .lean();
 
-            const [items, totalCount] = await Promise.all([
+            const [products, totalCount] = await Promise.all([
                 promiseProducts,
                 Product.countDocuments(findObj),
             ]);
-            const products = markFavoritesProducts(items, req.favorites.items);
 
             return res.status(200).json({
                 status: 'succes',

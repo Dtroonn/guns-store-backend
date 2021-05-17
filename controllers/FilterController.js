@@ -2,19 +2,45 @@ const { Type, Kind, Product } = require('../models');
 
 class FilterController {
     async get(req, res) {
-        const findObj = {
-            category: req.category,
-        };
+        const { category } = req;
+        const findObj = {};
+        if (category) {
+            findObj.category = category;
+        }
+
+        if (req.query.search) {
+            findObj.name = { $regex: new RegExp(`${req.query.search}`), $options: 'i' };
+        }
+
         try {
-            const [discountedProductsCount, types, kinds] = await Promise.all([
+            const [
+                cheapestProduct,
+                mostExpensiveProduct,
+                discountedProductsCount,
+                types,
+                kinds,
+            ] = await Promise.all([
+                Product.findOne(findObj).sort({ 'price.current': 1 }).select('price').lean(),
+                Product.findOne(findObj).sort({ 'price.current': -1 }).select('price').lean(),
                 Product.countDocuments({ ...findObj, 'price.old': { $ne: null } }),
-                Type.find(findObj).select('-category').lean(),
-                Kind.find(findObj).select('-category').lean(),
+                findObj.category
+                    ? Type.find({ category: findObj.category }).select('-category').lean()
+                    : [],
+                findObj.category
+                    ? Kind.find({ category: findObj.category }).select('-category').lean()
+                    : [],
             ]);
+
+            const minPriceProduct = cheapestProduct ? cheapestProduct.price.current : 0;
+            const maxPriceProduct = mostExpensiveProduct ? mostExpensiveProduct.price.current : 1;
 
             res.status(200).json({
                 status: 'succes',
-                filtres: {
+                filters: {
+                    price: {
+                        min: minPriceProduct,
+                        max: maxPriceProduct,
+                    },
                     sale: {
                         productsCount: discountedProductsCount,
                     },

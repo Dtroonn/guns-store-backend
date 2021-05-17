@@ -11,7 +11,7 @@ exports.createOrderValidator = [
 
     body('email').isEmail().withMessage('incorrect email').normalizeEmail(),
 
-    body('phone')
+    body('tel')
         .notEmpty()
         .withMessage('phone is required')
         .isNumeric('phone must contain only numbers')
@@ -31,8 +31,8 @@ exports.createOrderValidator = [
         .optional()
         .isString()
         .withMessage('comment must be string')
-        .isLength({ max: 500 })
-        .withMessage('comment must not exceed 500 characters'),
+        .isLength({ max: 250 })
+        .withMessage('comment must not exceed 250 characters'),
     body('receiOptionId')
         .notEmpty()
         .withMessage('receiOptionId is required')

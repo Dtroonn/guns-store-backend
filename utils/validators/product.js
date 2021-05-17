@@ -18,7 +18,7 @@ exports.createProductValidator = [
     body('name')
         .isString()
         .withMessage('name must be string')
-        .isLength({ min: 2, max: 40 })
+        .isLength({ min: 2, max: 100 })
         .withMessage('name must be between 2 and 40 characters'),
 
     body('currentPrice')
@@ -83,7 +83,7 @@ exports.createProductValidator = [
         .optional()
         .isNumeric()
         .withMessage('rating must be number')
-        .isFloat({ min: 0, max: 5 })
+        .isFloat({ min: 1, max: 5 })
         .withMessage('rating must be range 0 and 5'),
 ];
 
@@ -134,6 +134,21 @@ exports.getProductsValidator = [
         .withMessage('category must be string')
         .toLowerCase()
         .custom(checkCategoryBySlug),
+
+    query('price')
+        .optional()
+        .custom(async (value, { req }) => {
+            const prices = value.split(',');
+            const minPrice = Number(prices[0]);
+            const maxPrice = Number(prices[1]);
+            if (isNaN(minPrice) || isNaN(maxPrice)) {
+                return Promise.reject('price is incorrect');
+            }
+            req.price = {
+                min: minPrice,
+                max: maxPrice,
+            };
+        }),
 
     query('type')
         .optional()

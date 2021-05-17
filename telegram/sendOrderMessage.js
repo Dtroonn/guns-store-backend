@@ -18,7 +18,7 @@ module.exports = async function (order) {
 const createMessage = (order) => {
     const messageFields = [
         `<b>Имя:</b> ${order.contactDetails.name}`,
-        `<b>Телефон:</b> ${order.contactDetails.phone}`,
+        `<b>Телефон:</b> ${order.contactDetails.tel}`,
         `<b>Почта:</b> ${order.contactDetails.email}`,
         `<b>Город:</b> ${order.delivery.adress.city}`,
         `<b>Улица, дом:</b> ${
@@ -31,7 +31,7 @@ const createMessage = (order) => {
             order.delivery.adress.apartment ? order.delivery.adress.apartment : 'Не указано'
         }`,
         `<b>Способ доставки:</b> ${order.receiOption.title}`,
-        `<b>Стоимость доставки:</b> ${order.receiOption.price}`,
+        `<b>Стоимость доставки:</b> ${order.receiOption.price} руб`,
         `<b>Способ оплаты:</b> ${order.payOption.title}`,
         `<b>Заказ</b>: {\n${order.items
             .map(
@@ -39,8 +39,10 @@ const createMessage = (order) => {
                     `<i>Название:</i> ${item.product.name}, <i>Категория:</i> ${item.product.category.name}, <i>Кол-во:</i> ${item.count},`,
             )
             .join('\n')}\n}`,
-        `<b>Общая цена:</b> ${order.totalPrice}`,
-        `<b>Комментарий к заказу:</b> ${order.comment ? order.comment : 'Не указано'}`,
+        `<b>Общая цена:</b> ${order.totalPrice} руб`,
+        `<b>Комментарий к заказу:</b> ${
+            order.delivery.comment ? order.delivery.comment : 'Не указано'
+        }`,
     ];
 
     return messageFields.join('\n');

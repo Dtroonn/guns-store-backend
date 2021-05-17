@@ -32,6 +32,7 @@ exports.createFilterValidator = [
 
 exports.getFilterValidator = [
     param('category')
+        .optional()
         .isString()
         .withMessage('category must be string')
         .toLowerCase()

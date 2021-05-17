@@ -22,7 +22,11 @@ module.exports = async function (req, res, next) {
                 .select('-items._id -userId')
                 .populate({
                     path: 'items.product',
-                    populate: { path: 'category', select: '-_id, -productsCount' },
+                    populate: [
+                        { path: 'category', select: '-_id -productsCount' },
+                        { path: 'type', select: '-_id -productsCount -category' },
+                        { path: 'kind', select: '-_id -productsCount -category' },
+                    ],
                 });
 
             if (!candidate) {
@@ -42,7 +46,11 @@ module.exports = async function (req, res, next) {
             .select('-items._id')
             .populate({
                 path: 'items.product',
-                populate: { path: 'category', select: '-_id -productsCount' },
+                populate: [
+                    { path: 'category', select: '-_id -productsCount' },
+                    { path: 'type', select: '-_id -productsCount -category' },
+                    { path: 'kind', select: '-_id -productsCount -category' },
+                ],
             });
         cart.totalPrice = calculateFullPrice(cart.items);
         req.cart = cart;
