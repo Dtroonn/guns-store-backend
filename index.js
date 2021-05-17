@@ -29,6 +29,9 @@ app.use(
     }),
 );
 
+app.get('/', async (req, res) => {
+    res.end('Hello, it is api for guns store. Example /api/products');
+});
 app.use('/api/products', require('./routes/products'));
 app.use('/api/categories', require('./routes/categories'));
 app.use('/api/auth', require('./routes/auth'));
@@ -50,7 +53,7 @@ async function start() {
             useCreateIndex: true,
         });
 
-        app.listen(5555, () => {
+        app.listen(process.env.PORT || 5555, () => {
             console.log('Server is running...');
         });
     } catch (e) {
