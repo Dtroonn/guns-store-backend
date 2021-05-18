@@ -26,7 +26,6 @@ app.use(
         secret: SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
-        proxy: true,
         cookie: {
             maxAge: 31536000000,
             secure: true,
