@@ -17,7 +17,6 @@ app.use(cors({ credentials: true, origin: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 app.use(
     session({
         secret: SESSION_SECRET,
@@ -25,9 +24,7 @@ app.use(
         saveUninitialized: false,
         cookie: {
             maxAge: 31536000000,
-            sameSite: "None",
-            secure: true,
-            
+            sameSite: 'none',
         },
         store,
     }),
