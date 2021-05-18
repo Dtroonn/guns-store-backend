@@ -16,6 +16,9 @@ const store = MongoStore({
 app.use(cors({ credentials: true, origin: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use((req, res, next) => {
+    res.setHeader('Acces');
+});
 
 app.enable('trust proxy');
 app.use(
@@ -23,6 +26,7 @@ app.use(
         secret: SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
+        proxy: true,
         cookie: {
             maxAge: 31536000000,
             secure: true,
