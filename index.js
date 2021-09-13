@@ -26,11 +26,7 @@ app.use(
             httpOnly: true,
             secure: true,
             domain: "herokuapp.com",
-<<<<<<< HEAD
             sameSite: "none",
-=======
-            sameSite: "strict",
->>>>>>> 8f4d693d459a7a9d42a03d193fa5a08748258352
         },
         store,
     }),
