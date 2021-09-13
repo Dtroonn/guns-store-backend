@@ -17,6 +17,7 @@ app.use(cors({ credentials: true, origin: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.enable("trust proxy");
 app.use(
     session({
         secret: SESSION_SECRET,
@@ -26,11 +27,7 @@ app.use(
             httpOnly: true,
             secure: true,
             domain: "herokuapp.com",
-<<<<<<< HEAD
             sameSite: "none",
-=======
-            sameSite: "strict",
->>>>>>> 8f4d693d459a7a9d42a03d193fa5a08748258352
         },
         store,
     }),
