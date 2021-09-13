@@ -27,6 +27,7 @@ app.use(
             maxAge: 31536000000,
             httpOnly: true,
             secure: true,
+            domain: "herokuapp.com",
             sameSite: "strict",
         },
         store,
