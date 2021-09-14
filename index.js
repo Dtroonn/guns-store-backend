@@ -33,7 +33,7 @@ app.use(
     }),
 );
 
-app.use(express.static(path.join(__dirname, "/frontend/dist")));
+app.use(express.static(path.join(__dirname, "frontend/build")));
 
 app.get("/", async (req, res) => {
     res.end("Hello, it is api for guns store. Example /api/products");
@@ -51,7 +51,7 @@ app.use("/api/kinds", require("./routes/kinds"));
 app.use("/api/filters", require("./routes/filters"));
 
 app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname + "/frontend/dist/index.html"));
+    res.sendFile(path.join(__dirname + "/frontend/build/index.html"));
 });
 
 async function start() {
