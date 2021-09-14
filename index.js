@@ -17,7 +17,6 @@ app.use(cors({ credentials: true, origin: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.enable("trust proxy");
 app.use(
     session({
         secret: SESSION_SECRET,
@@ -25,7 +24,7 @@ app.use(
         cookie: {
             maxAge: 31536000000,
             secure: true,
-            domain: "herokuapp.com",
+            domain: "guns-store.herokuapp.com",
             sameSite: "none",
         },
         store,
