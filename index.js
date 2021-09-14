@@ -25,7 +25,7 @@ app.use(
         cookie: {
             maxAge: 31536000000,
             secure: true,
-            domain: "guns-store.herokuapp.com",
+            domain: "herokuapp.com",
             sameSite: "none",
         },
         store,
