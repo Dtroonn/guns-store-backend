@@ -33,7 +33,7 @@ app.use(
     }),
 );
 
-app.use(express.static(path.join(__dirname, "frontend/build")));
+app.use(express.static(path.join(__dirname, "/frontend/build")));
 
 app.get("/", async (req, res) => {
     res.end("Hello, it is api for guns store. Example /api/products");
