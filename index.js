@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const session = require("express-session");
+const path = require("path");
 const MongoStore = require("connect-mongodb-session")(session);
 
 const { MONGODB_URI, SESSION_SECRET } = require("./keys");
@@ -32,6 +33,8 @@ app.use(
     }),
 );
 
+app.use(express.static(path.join(__dirname, "frontend/build")));
+
 app.get("/", async (req, res) => {
     res.end("Hello, it is api for guns store. Example /api/products");
 });
@@ -46,6 +49,10 @@ app.use("/api/pay-options", require("./routes/payOptions"));
 app.use("/api/types", require("./routes/types"));
 app.use("/api/kinds", require("./routes/kinds"));
 app.use("/api/filters", require("./routes/filters"));
+
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname + "/frontend/build/index.html"));
+});
 
 async function start() {
     try {

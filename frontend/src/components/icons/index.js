@@ -1,0 +1,10 @@
+export { default as FavoritesIcon } from "./Favorites.jsx";
+export { default as CartIcon } from "./Cart.jsx";
+export { default as MenuIcon } from "./Menu.jsx";
+export { default as CrossIcon } from "./Cross.jsx";
+export { default as ArrowIcon } from "./Arrow.jsx";
+export { default as FilterIcon } from "./Filter.jsx";
+export { default as MinusIcon } from "./Minus.jsx";
+export { default as PlusIcon } from "./Plus.jsx";
+export { default as SearchIcon } from "./Search.jsx";
+export { default as SuccessIcon } from "./Success.jsx";
