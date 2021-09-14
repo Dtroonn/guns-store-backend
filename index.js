@@ -24,9 +24,7 @@ app.use(
         saveUninitialized: false,
         cookie: {
             maxAge: 31536000000,
-            httpOnly: true,
             secure: true,
-            domain: "60a2cef6309c7a21a09e5f8e--keen-lamport-a7fdd7.netlify.app",
             sameSite: "none",
         },
         store,
