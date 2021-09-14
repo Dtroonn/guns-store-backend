@@ -25,6 +25,7 @@ app.use(
         cookie: {
             maxAge: 31536000000,
             secure: true,
+            path: "/lalka",
             domain: "guns-store.herokuapp.com",
             sameSite: "none",
         },
